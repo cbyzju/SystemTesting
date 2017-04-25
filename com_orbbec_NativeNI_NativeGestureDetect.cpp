@@ -20,6 +20,7 @@ note:       Projector-camera Android ֲJNI File
 #include "Htime.h"
 #include <algorithm>
 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -387,8 +388,8 @@ string AndroidResponds(ProjectorCamera* proCameraPtr)
 	try
 	{
 		//get rgb and depth image
-		Mat iRImg(*(Mat *)iRPt);
-		Mat depImg(*(Mat *)depthPt);
+		cv::Mat iRImg(*(cv::Mat *)iRPt);
+		cv::Mat depImg(*(cv::Mat *)depthPt);
 
 		((ProjectorCamera*)proCameraPtr)->offset_x = offset_x;
 		((ProjectorCamera*)proCameraPtr)->offset_y = offset_y;

@@ -159,7 +159,7 @@ void DoubleOneHandActive::dealOneHandDoubleTouch(Role* role)
 	TouchPoint& lastTouchPoint2 = (role->histTouchHands[role->histTouchHands.size() - 1][0].touchPoints[1]);
 
 	//keep order according to palm center position
-	Point2f palmDis = role->histTouchHands[role->histTouchHands.size() - 1][0].palmCenter - role->curtTouchHands[0].palmCenter;
+	cv::Point2f palmDis = role->histTouchHands[role->histTouchHands.size() - 1][0].palmCenter - role->curtTouchHands[0].palmCenter;
 	if (norm(curtTouchPoint1.tipInPro + palmDis - lastTouchPoint1.tipInPro) >
 		norm(curtTouchPoint2.tipInPro + palmDis - lastTouchPoint2.tipInPro))
 	{
@@ -196,8 +196,8 @@ void DoubleOneHandActive::dealOneHandDoubleTouch(Role* role)
 	//pinch move
 	if (pinchDis > minPinchDis || point1Move || point2Move)
 	{
-		Point2f d1 = curtTouchPoint1.tipInPro - lastTouchPoint1.tipInPro;
-		Point2f d2 = curtTouchPoint2.tipInPro - lastTouchPoint2.tipInPro;
+		cv::Point2f d1 = curtTouchPoint1.tipInPro - lastTouchPoint1.tipInPro;
+		cv::Point2f d2 = curtTouchPoint2.tipInPro - lastTouchPoint2.tipInPro;
 
 		for (int ind = insertNum - 1; ind >= 0; ind--)
 		{

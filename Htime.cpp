@@ -1,45 +1,122 @@
-#include "htime.h"
+/********************************************************************
+Projection time:	2017/03/20   10:55
+File Name: 	Htime.cpp
+@author:	<hzzhouzhimin@corp.netease.com>
+Copyright (c) 2017, NetEase Inc. All rights reserved.
+
+note:       time testing file
+*********************************************************************/
+
+
+#include "Htime.h"
 
 /**************************C++ time function***********************/
-htime::htime(void)
+
+/*!
+@function
+@abstract              construction function
+@discussion
+@param
+@result
+*/
+Htime::Htime(void)
 {
 	running = false;
 }
 
-
-htime::~htime(void)
+/*!
+@function
+@abstract              destruction function
+@discussion
+@param
+@result
+*/
+Htime::~Htime(void)
 {
 }
 
-void htime::start()
+/*!
+@function
+@abstract              start timing
+@discussion
+@param
+@result
+*/
+void Htime::start()
 {
 	t1 = clock();
 	running = true;
 }
-void htime::reset()
+
+/*!
+@function
+@abstract              reset timing
+@discussion
+@param
+@result
+*/
+void Htime::reset()
 {
 	t1=clock();
 }
-float htime::getClock()
+
+/*!
+@function
+@abstract              end timing 
+@discussion
+@param
+@result
+*/
+float Htime::getClock()
 {
 	return ( clock()-t1 );
 }
 
+
 /**************************opencv time function***********************/
+
+/*!
+@function
+@abstract              construction function and start timing
+@discussion
+@param
+@result
+*/
 CVTIME::CVTIME()
 {
 	clock = cv::getTickCount();
 }
 
+/*!
+@function
+@abstract              destruction function
+@discussion
+@param
+@result
+*/
 CVTIME::~CVTIME()
 {
 }
 
+/*!
+@function
+@abstract              reset timing
+@discussion
+@param
+@result
+*/
 void CVTIME::reset()
 {
 	clock = cv::getTickCount();
 }
 
+/*!
+@function
+@abstract              end timing
+@discussion
+@param
+@result
+*/
 double CVTIME::getClock()
 {
 	clock = cv::getTickCount() - clock;

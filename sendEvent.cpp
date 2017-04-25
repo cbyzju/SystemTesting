@@ -51,12 +51,6 @@
 			  event.time = tv;
 			  write(fd, &event, sizeof(event));
 
-			 // event.type = EV_ABS;
-            //  event.code = ABS_MT_TOUCH_MINOR;
-             // event.value = angle;
-             // event.time = tv;
-            //  write(fd, &event, sizeof(event));
-
               event.type = EV_ABS;
               event.code = ABS_MT_WIDTH_MAJOR ;
               event.value = orientation;

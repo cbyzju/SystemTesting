@@ -235,8 +235,8 @@ void DoubleTwoHandActive::dealTwoHandDoubleTouch(Role* role)
 	//pinch move
 	if (pinchDis > minPinchDis || point1Move || point2Move)
 	{
-		Point2f d1 = curtTouchPoint1.tipInPro - lastTouchPoint1.tipInPro;
-		Point2f d2 = curtTouchPoint2.tipInPro - lastTouchPoint2.tipInPro;
+		cv::Point2f d1 = curtTouchPoint1.tipInPro - lastTouchPoint1.tipInPro;
+		cv::Point2f d2 = curtTouchPoint2.tipInPro - lastTouchPoint2.tipInPro;
 
 		for (int ind = insertNum - 1; ind >= 0; ind--)
 		{

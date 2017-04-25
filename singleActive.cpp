@@ -139,7 +139,7 @@ void SingleActive::dealSingleTouch(Role* role)
 		//move prediction
 		movePrediction(role);
 
-		Point2f last2cur = curtTouchPoint.tipInPro - lastTouchPoint.tipInPro;
+		cv::Point2f last2cur = curtTouchPoint.tipInPro - lastTouchPoint.tipInPro;
 		for (int ind = insertNum - 1; ind >= 0; ind--)
 		{
 			//if not shake using current data

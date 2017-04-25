@@ -3,7 +3,7 @@
 
 #include <opencv2/opencv.hpp>
 
-using namespace cv;
+//using namespace cv;
 using namespace std;
 
 //const int --can be modefied
@@ -48,9 +48,9 @@ enum HandOpen{
 
 struct ConvexityDefect
 {
-	Point start;
-	Point end;
-	Point depth_point;
+	cv::Point start;
+	cv::Point end;
+	cv::Point depth_point;
 	float depth;
 };
 

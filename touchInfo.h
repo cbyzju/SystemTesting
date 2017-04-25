@@ -18,13 +18,13 @@ note:       touch information file
 #include "opencv2/opencv.hpp"
 
 using namespace std;
-using namespace cv;
+//using namespace cv;
 
 class TouchPoint
 {
 public:
 	//finger touch information in depth camera
-	Point2f tipPosition, bottomPosition, direction, palmToTip;
+	cv::Point2f tipPosition, bottomPosition, direction, palmToTip;
 	float   angle, orien;
 	float   tipDepth, bottomDepth;	
 	int     frameId;
@@ -32,7 +32,7 @@ public:
 
 
 	//finger touch information in projector camera
-	Point2f tipInPro;
+	cv::Point2f tipInPro;
 
 public:
 	TouchPoint() :angle(0), tipDepth(0), bottomDepth(0), orien(0){};
@@ -57,11 +57,12 @@ public:
     //detection data
 	float   palmDepth;
 	double  palmRadius;
-	Point   palmCenter;
+	cv::Point   palmCenter;
 	double  realRadius;
+	cv::Rect    palmRec;
 
 	int     frameId;
-	vector<Point> approxCurve;
+	vector<cv::Point> approxCurve;
 	vector<TouchPoint> touchPoints;
 };
 #endif
