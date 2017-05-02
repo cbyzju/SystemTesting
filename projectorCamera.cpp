@@ -1153,6 +1153,7 @@ void ProjectorCamera::findOnDeskObject()
     	Eigen::Matrix<double, 3, 1> PointInCol;
     	for (size_t k = 0; k < vpoints.size(); ++k) //图像像素坐标系下的点在相机坐标系下的物理坐标
     	{
+    	    //LOGD("coordinate %f, %f\n", vpoints[k].y, vpoints[k].x);
     		double depthVal = averaImg.at<float>(vpoints[k].y, vpoints[k].x);
     		Tmp(0, 0) = depthVal * (vpoints[k].x + screenRoi.x - cx)*1.0 / fx;
     		Tmp(1, 0) = depthVal * (vpoints[k].y + screenRoi.y - cy)*1.0 / fy;
@@ -1232,6 +1233,8 @@ void ProjectorCamera::findOnDeskObject()
 
         #pragma region keep stable
        	//（1）匹配失败处理：如果匹配完的点与vpoints距离不大，就用匹配完的点（更精确）；否则使用vpoints（匹配失败）。
+       	float bias = 2.5;    //y方向的系统偏差
+        float dep_bias = -9; //深度方向的系统偏差
        	float max_dis_1 = 0;
        	for (size_t mm = 0; mm < 4; ++mm)
        	{
@@ -1257,29 +1260,17 @@ void ProjectorCamera::findOnDeskObject()
        			vpoints_four.push_back(vpoints[index]);
        			vertexDepth.push_back(averaImg.at<float>(vpoints[index].y, vpoints[index].x));
        		}
-       		for(int dex=0;dex<vpoints_four.size();dex++)
-            {
-                cv::Point2f& point1 = vpoints_four[dex];
-                for(auto point2:temHand.approxCurve)
-                {
-                      if(norm(point1 - cv::Point2f(point2.x, point2.y)) < 20)
-                      {
-                             point1 = (point1 + cv::Point2f(point2.x, point2.y)) * 0.5;
-                             break;
-                      }
-                }
-            }
+
             clockwiseContour(vpoints_four);
        		calibDepToPro(vpoints_four, vertexDepth, output_1);  //如果距离过大，使用vpoints在投影仪坐标系下的坐标
        		refineVerticals(output_1);
        		second_diff = 8; //vpoints的波动比较大
+       		dep_bias = 0;
        	}
        	else
        		output_1 = reg;  //否则使用icp匹配出的点坐标
 
        	//（2）防抖处理：如果（1）输出的点与上一次的点距离不大，就用上一次的点（防抖动）；否则使用本次的点（物体被移动）。
-       	float bias = 2.5;    //y方向的系统偏差
-       	float dep_bias = -9; //深度方向的系统偏差
        	vector<cv::Point3f> output_2(4);
        	if (stereoProjectDesk.lastId == 0)
        	{
@@ -1290,6 +1281,7 @@ void ProjectorCamera::findOnDeskObject()
                stereoProjectDesk.proVertex3D[index].y -= bias;
                stereoProjectDesk.proVertex3D[index].z -= dep_bias;
             }
+            stereoProjectDesk.last_bias = dep_bias;
        		stereoProjectDesk.lastId++;
        		stereoProjectDesk.valid = true;
        		continue;
@@ -1298,7 +1290,7 @@ void ProjectorCamera::findOnDeskObject()
 	    for(size_t index =0; index <stereoProjectDesk.proVertex3D.size(); ++index)
 	    {
 	           stereoProjectDesk.proVertex3D[index].y += bias;
-	           stereoProjectDesk.proVertex3D[index].z += dep_bias;
+	           stereoProjectDesk.proVertex3D[index].z += stereoProjectDesk.last_bias;
 	    }
 
        	vector<cv::Point3f> lastVertex3D = stereoProjectDesk.proVertex3D;
@@ -1345,11 +1337,11 @@ void ProjectorCamera::findOnDeskObject()
        	    output_2[index].y -= bias;
        	    output_2[index].z -= dep_bias;
        	}
+        stereoProjectDesk.last_bias = dep_bias;
        	stereoProjectDesk.proVertex3D = output_2;
        	stereoProjectDesk.valid = true;
         #pragma endregion
-
-        LOGD("max_dis_1: %f, max_dis_2: %f, second_diff: %f", max_dis_1, max_dis_2, second_diff);
+        LOGD("max_dis_1: %f, max_dis_2: %f, second_diff: %f, depth_bias: %f", max_dis_1, max_dis_2, second_diff, dep_bias);
 		continue;
 
         for(int dex=0;dex<vpoints.size();dex++)

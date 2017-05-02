@@ -58,7 +58,7 @@ struct StereoProjection
 	vector<TouchHand> curtHands;
 	vector<TouchHand> lastHands;
 	cv::Point2f center;
-	int lastId,first;
+	int lastId,first,last_bias;
 	bool valid,boatDemo;
 	StereoProjection() :valid(false),lastId(0),first(0){};
 };
