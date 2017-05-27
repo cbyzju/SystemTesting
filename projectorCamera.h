@@ -198,5 +198,9 @@ public:
     int pixelInd;
     int fgNum, bgNum;
     vector<bool> isFingers;
+
+     //for test
+        vector<TouchPoint> touchPointsAll;
+        int countid;
 };
 #endif

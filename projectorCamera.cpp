@@ -74,6 +74,10 @@ ProjectorCamera::ProjectorCamera()
     wavestate_finnal = NOWAVE;
 
 	init();
+
+	//for test
+	remove("frame_test.txt");
+    countid = 0;
 }
 
 /*!
@@ -870,92 +874,137 @@ void ProjectorCamera::findFinger()
 			//touchPoint.tipInPro = calibDepToPro(touchPoint.tipPosition, touchPoint.tipDepth);
 			touchPoint.tipInPro = homogCamToPro(touchPoint.tipPosition);
 
-			LOGD("nativeStart caught in findFinger detect touchPoint: %d %f %f %f %f %f %f/n", frameId,
-				touchPoint.tipPosition.x, touchPoint.tipPosition.y,
-				touchPoint.tipInPro.x, touchPoint.tipInPro.y, angle,fingerRatio);
+                        //for test
+                        LOGD("touchPointsAll.size() = %d",touchPointsAll.size());
+                        if(touchPointsAll.size()==0)
+                            touchPointsAll.push_back(touchPoint);
+                        else if(touchPoint.frameId - touchPointsAll[touchPointsAll.size()-1].frameId <150 ){
+                            touchPointsAll.push_back(touchPoint);
+                        }
+                        else{
+                        if(touchPointsAll.size()>1){
+                             int totalsize =  touchPointsAll[touchPointsAll.size()-1].frameId-  touchPointsAll[0].frameId+1;
+                             int cursize  =  touchPointsAll.size();
+                             int lostframes = totalsize- cursize;
+                             float lostframesratio = lostframes*1.0/totalsize;
+                             float speed =  (sqrt((touchPointsAll[touchPointsAll.size()-1].tipPosition.x-touchPointsAll[0].tipPosition.x)*(touchPointsAll[touchPointsAll.size()-1].tipPosition.x-touchPointsAll[0].tipPosition.x)+(touchPointsAll[touchPointsAll.size()-1].tipPosition.y-touchPointsAll[0].tipPosition.y)*(touchPointsAll[touchPointsAll.size()-1].tipPosition.y-touchPointsAll[0].tipPosition.y)))*1.0/(totalsize*1.0/30);
+                             speed = speed/16.0; //cm/s.
+                             LOGD("countid = %d, lostframesratio = %f,speed = %f,totalsize = %d,cursize = %d, startPoint = (%f,%f),endPoint = (%f,%f)",countid, lostframesratio,speed,totalsize,cursize,touchPointsAll[0].tipPosition.x,touchPointsAll[0].tipPosition.y,touchPointsAll[touchPointsAll.size()-1].tipPosition.x,touchPointsAll[touchPointsAll.size()-1].tipPosition.y);
 
-			curtHand.touchPoints.push_back(touchPoint);
-		}
+                             countid++;
+                             ofstream outfile;
+                             outfile.open("/sdcard/frame_test.txt", ios::app);
+                             if(!outfile)
+                                 LOGD("no this file %d", frameId);
+                              else
+                             {
+                                 //outfile<<"end id: "<<touchPointsAll[touchPointsAll.size()-1].frameId<<",start id: "<<touchPointsAll[0].frameId<<",totalsize: "<< totalsize<<",cursize: "<<cursize<<",lostframes: "<<lostframes<<",lostratio: "<<",lostframesratio"<<lostframesratio<<endl;
+                                 //outfile<<countid<<" "<<touchPointsAll[0].frameId<<" "<<touchPointsAll[touchPointsAll.size()-1].frameId<<"  "<< totalsize<<" "<<cursize<<" "<<lostframes<<" "<<lostframesratio<<" "<<speed<<" ";
+                                 outfile<<countid<<" "<< touchPointsAll[0].frameId<<" "<<touchPointsAll[touchPointsAll.size()-1].frameId<<" "<<totalsize<<" "<<cursize<<" ";
+                                 //LOGD("ID = %f, total frame = %d, valid frame = %d", countid, totalsize, cursize);
+                                 for(int kk=0; kk<touchPointsAll.size(); ++kk)
+                                 {
+                                      outfile<< touchPointsAll[kk].frameId<<" "<<touchPointsAll[kk].tipPosition.x<<" "<<touchPointsAll[kk].tipPosition.y<<" ";
+                                      //float p_speed = (sqrt((touchPointsAll[kk+1].tipPosition.x-touchPointsAll[kk].tipPosition.x)*(touchPointsAll[kk+1].tipPosition.x-touchPointsAll[kk].tipPosition.x)+(touchPointsAll[kk+1].tipPosition.y-touchPointsAll[kk].tipPosition.y)*(touchPointsAll[kk+1].tipPosition.y-touchPointsAll[kk].tipPosition.y)))*1.0/((touchPointsAll[kk+1].frameId-touchPointsAll[kk].frameId)*1.0/30);
+                                     // p_speed = p_speed/16.0; //cm/s
+                                     // outfile<<p_speed<<" ";
+                                 }
+                                 outfile<<"\r\n";
+                                 //outfile<<endl;
+                             }
+                              outfile.close();
+                        }
+                            touchPointsAll.clear();
+                            touchPointsAll.push_back(touchPoint);
+                        }
 
-		if (curtHand.touchPoints.size()>0)
-		{
-		    LOGD("nativeStart caught in findFinger %d",curtHand.touchPoints.size());
-			fingerTouchRole.curtTouchHands.push_back(curtHand);
-		}
+            			LOGD("nativeStart caught in findFinger detect touchPoint: %d %f %f %f %f %f %f/n", frameId,
+            				touchPoint.tipPosition.x, touchPoint.tipPosition.y,
+            				touchPoint.tipInPro.x, touchPoint.tipInPro.y, angle,fingerRatio);
 
-		int nearestHistHandInd = -1;
-		for (int handInd = 0; handInd < vtouchHand_last.size(); handInd++)
-		{
-			float palmDis = norm(vtouchHand_last[handInd].palmCenter - curtHand.palmCenter);
+            			curtHand.touchPoints.push_back(touchPoint);
+            		}
 
-			LOGD("nativeStart caught in findFinger insert touchPoint: %d firstId%d palmDis%f lastid%d oldDepth%f curDepth%f histSize%d curtSize%d",
-				frameId, fingerTouchRole.firstTouchId, palmDis, vtouchHand_last[handInd].frameId,
-				vtouchHand_last[handInd].palmDepth, foreground.at<float>(curtHand.palmCenter),
-				vtouchHand_last[handInd].touchPoints.size(), curtHand.touchPoints.size());
+            		if (curtHand.touchPoints.size()>0)
+            		{
+            		    LOGD("nativeStart caught in findFinger %d",curtHand.touchPoints.size());
+            			fingerTouchRole.curtTouchHands.push_back(curtHand);
+            		}
 
-			//static hand
-            if (existFinger) continue;
+                    continue;//关闭补点操作。
+            		int nearestHistHandInd = -1;
+            		for (int handInd = 0; handInd < vtouchHand_last.size(); handInd++)
+            		{
+            			float palmDis = norm(vtouchHand_last[handInd].palmCenter - curtHand.palmCenter);
 
-			if (palmDis < 5 ||
-			    palmDis > 45 + 15* (frameId - vtouchHand_last[handInd].frameId) || //palm center is near
-				frameId - vtouchHand_last[handInd].frameId >= 3 ||                        //continue in 3 frames
-				curtHand.touchPoints.size() >= vtouchHand_last[handInd].touchPoints.size() || //exist history hand,who's touch points bigger than current hand
-				foreground.at<float>(curtHand.palmCenter) - vtouchHand_last[handInd].palmDepth > 15 || //hand palm depth not shape change
-				curtHand.palmCenter.y > depthImg.rows - 10)                              //near border not add
-			{
-				continue;
-			}
-			else
-			{
-				nearestHistHandInd = handInd;
-				break;
-			}
-		}
+            			LOGD("nativeStart caught in findFinger insert touchPoint: %d firstId%d palmDis%f lastid%d oldDepth%f curDepth%f histSize%d curtSize%d",
+            				frameId, fingerTouchRole.firstTouchId, palmDis, vtouchHand_last[handInd].frameId,
+            				vtouchHand_last[handInd].palmDepth, foreground.at<float>(curtHand.palmCenter),
+            				vtouchHand_last[handInd].touchPoints.size(), curtHand.touchPoints.size());
 
-		if (nearestHistHandInd < 0) continue;
+            			//static hand
+                        if (existFinger) continue;
 
-		TouchHand& corpHand = vtouchHand_last[nearestHistHandInd];
-		TouchHand  instHand;
-		for (int pointInd = 0; pointInd < corpHand.touchPoints.size(); pointInd++)
-		{
-			TouchPoint touchPoint = corpHand.touchPoints[pointInd];
-			touchPoint.tipPosition = touchPoint.palmToTip + cv::Point2f(curtHand.palmCenter.x, curtHand.palmCenter.y);
-			if(touchPoint.tipPosition.y < 0 || touchPoint.tipPosition.y > depthImg.rows - 1 ||
-			   touchPoint.tipPosition.x < 0 || touchPoint.tipPosition.x > depthImg.cols - 1)
-			   continue;
-			touchPoint.tipDepth = averaImg.at<float>(touchPoint.tipPosition.y, touchPoint.tipPosition.x);
-			touchPoint.bottomPosition = curtHand.palmCenter;
-			touchPoint.bottomDepth = depthImg.at<float>(curtHand.palmCenter);
-			touchPoint.getAngle();
-			touchPoint.getOrien();
-			touchPoint.palmToTip = touchPoint.tipPosition - cv::Point2f(curtHand.palmCenter.x, curtHand.palmCenter.y);
-			touchPoint.frameId = frameId;
-			touchPoint.isReal = false;
-			//touchPoint.tipInPro = calibDepToPro(touchPoint.tipPosition, touchPoint.tipDepth);
-			touchPoint.tipInPro = homogCamToPro(touchPoint.tipPosition);
-			instHand.touchPoints.push_back(touchPoint);
+            			if (palmDis < 5 ||
+            			    palmDis > 45 + 15* (frameId - vtouchHand_last[handInd].frameId) || //palm center is near
+            				frameId - vtouchHand_last[handInd].frameId >= 3 ||                        //continue in 3 frames
+            				curtHand.touchPoints.size() >= vtouchHand_last[handInd].touchPoints.size() || //exist history hand,who's touch points bigger than current hand
+            				foreground.at<float>(curtHand.palmCenter) - vtouchHand_last[handInd].palmDepth > 15 || //hand palm depth not shape change
+            				curtHand.palmCenter.y > depthImg.rows - 10)                              //near border not add
+            			{
+            				continue;
+            			}
+            			else
+            			{
+            				nearestHistHandInd = handInd;
+            				break;
+            			}
+            		}
 
-			LOGD("nativeStart caught in findFinger insert touchPoint: %d %d %d %f %f/n", frameId,
-				touchPoint.tipPosition.x, touchPoint.tipPosition.y,
-				touchPoint.tipInPro.x, touchPoint.tipInPro.y);
+            		if (nearestHistHandInd < 0) continue;
 
-		}
+            		TouchHand& corpHand = vtouchHand_last[nearestHistHandInd];
+            		TouchHand  instHand;
+            		for (int pointInd = 0; pointInd < corpHand.touchPoints.size(); pointInd++)
+            		{
+            			TouchPoint touchPoint = corpHand.touchPoints[pointInd];
+            			touchPoint.tipPosition = touchPoint.palmToTip + cv::Point2f(curtHand.palmCenter.x, curtHand.palmCenter.y);
+            			if(touchPoint.tipPosition.y < 0 || touchPoint.tipPosition.y > depthImg.rows - 1 ||
+            			   touchPoint.tipPosition.x < 0 || touchPoint.tipPosition.x > depthImg.cols - 1)
+            			   continue;
+            			touchPoint.tipDepth = averaImg.at<float>(touchPoint.tipPosition.y, touchPoint.tipPosition.x);
+            			touchPoint.bottomPosition = curtHand.palmCenter;
+            			touchPoint.bottomDepth = depthImg.at<float>(curtHand.palmCenter);
+            			touchPoint.getAngle();
+            			touchPoint.getOrien();
+            			touchPoint.palmToTip = touchPoint.tipPosition - cv::Point2f(curtHand.palmCenter.x, curtHand.palmCenter.y);
+            			touchPoint.frameId = frameId;
+            			touchPoint.isReal = false;
+            			//touchPoint.tipInPro = calibDepToPro(touchPoint.tipPosition, touchPoint.tipDepth);
+            			touchPoint.tipInPro = homogCamToPro(touchPoint.tipPosition);
+            			instHand.touchPoints.push_back(touchPoint);
 
-        //success insert touch points
-        if(instHand.touchPoints.size()>0)
-        {
-		    instHand.palmCenter = curtHand.palmCenter;
-		    instHand.palmDepth = corpHand.palmDepth;
-		    instHand.frameId = frameId;
-		    fingerTouchRole.curtTouchHands.push_back(instHand);
-		}
+            			LOGD("nativeStart caught in findFinger insert touchPoint: %d %d %d %f %f/n", frameId,
+            				touchPoint.tipPosition.x, touchPoint.tipPosition.y,
+            				touchPoint.tipInPro.x, touchPoint.tipInPro.y);
 
-	} // contour conditional
+            		}
 
-	//transform position from camera to projector
-	//transAxisCameraToPro();
-	return;
-}
+                    //success insert touch points
+                    if(instHand.touchPoints.size()>0)
+                    {
+            		    instHand.palmCenter = curtHand.palmCenter;
+            		    instHand.palmDepth = corpHand.palmDepth;
+            		    instHand.frameId = frameId;
+            		    fingerTouchRole.curtTouchHands.push_back(instHand);
+            		}
+
+            	} // contour conditional
+
+            	//transform position from camera to projector
+            	//transAxisCameraToPro();
+            	return;
+            }
 
 /*!
 @function              detection projection above desk
