@@ -1411,7 +1411,7 @@ void ProjectorCamera::findOnDeskObject()
 #pragma endregion
 		*/
 #pragma region icp registration
-		size_t iterations = 300;
+		size_t iterations = 200;
 		//pcl::GeneralizedIterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp;
 		pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp;
 		icp.setEuclideanFitnessEpsilon(1e-8);
