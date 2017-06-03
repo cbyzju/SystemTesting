@@ -1225,7 +1225,6 @@ void ProjectorCamera::findOnDeskObject()
 				rorec.points(ppt);
 				for (int ind = 0; ind < 4; ++ind)
 					tmp_vpoints.push_back(ppt[ind]);
-
 				clockwiseContour(tmp_vpoints);
 				bool outofBoundary = false;  //check if the points are out of boundary or not.
 				vector<float> d_val;
